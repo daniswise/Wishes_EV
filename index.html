@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ЗАЩИТА ОТ XSS И ВНЕШНИХ СКРИПТОВ -->
+    <!-- Разрешаем грузить только наши локальные файлы и стили внутри документа -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self';">
+    
+    <title>Поздравление Елене Владимировне</title>
+    <style>
+        /* --- ФОН И ОБЩИЕ СТИЛИ --- */
+        body {
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0f172a 60%, #020617 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* --- КАРТОЧКА --- */
+        .card {
+            background: #ffffff;
+            width: 92%; max-width: 380px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+            overflow: hidden; text-align: center;
+            position: relative; z-index: 10;
+            animation: floatIn 0.8s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        img.cover {
+            width: 100%; height: auto; display: block; object-fit: cover;
+            aspect-ratio: 4/3;
+        }
+
+        .content { 
+            padding: 20px 25px 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        h1 { 
+            color: #0f172a; 
+            font-size: 1.7rem;      
+            margin-bottom: 8px;     
+            line-height: 1.1;       
+            font-weight: 800;       
+            letter-spacing: -0.5px; 
+        }
+        
+        p.sub { 
+            color: #64748b; 
+            font-style: italic; 
+            margin-bottom: 15px; 
+            font-size: 0.9rem;
+        }
+        
+        /* --- БЛОК ПЛЕЕРА --- */
+        .player-box {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-top: auto;
+        }
+
+        audio {
+            width: 100%;
+            height: 40px;
+            outline: none;
+            border-radius: 8px;
+            background: transparent;
+        }
+
+        ::-webkit-media-controls-panel {
+            background-color: transparent !important;
+        }
+        
+        /* --- БОЛЬШАЯ КНОПКА PLAY/PAUSE --- */
+        .main-btn {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            border: none; 
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem; 
+            font-weight: bold;
+            color: #fff; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 12px;
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3);
+            outline: none; 
+            -webkit-tap-highlight-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .main-btn:active { transform: scale(0.98); }
+        
+        .main-btn.playing {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .hint { font-size: 0.7rem; color: #94a3b8; margin-top: 10px; text-align: center;}
+
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="cover.jpg" alt="Фото" class="cover">
+    
+    <div class="content">
+        <div>
+            <h1>С Днем Рождения,<br>Елена Владимировна!</h1>
+            <p class="sub">Приятного прослушивания...</p>
+        </div>
+
+        <button id="bigBtn" class="main-btn" onclick="toggle()">▶ ПОСЛУШАТЬ ТРЕК</button>
+
+        <div class="player-box">
+            <audio id="music" controls preload="auto">
+                <source src="Happy_Birthday_Elena_Vladimirovna.mp3" type="audio/mpeg">
+                Ваш браузер не поддерживает аудио.
+            </audio>
+        </div>
+        
+        <div class="hint">Нажмите кнопку выше или используйте панель ниже</div>
+    </div>
+</div>
+
+<script>
+    const m = document.getElementById('music');
+    const btn = document.getElementById('bigBtn');
+    let playing = false;
+
+    function toggle() {
+        if (!playing) {
+            m.play().then(() => {
+                playing = true;
+                updateUI(true);
+            }).catch(e => alert("Ошибка воспроизведения"));
+        } else {
+            m.pause();
+            playing = false;
+            updateUI(false);
+        }
+    }
+
+    m.addEventListener('play', () => {
+        playing = true;
+        updateUI(true);
+    });
+
+    m.addEventListener('pause', () => {
+        playing = false;
+        updateUI(false);
+    });
+
+    m.addEventListener('ended', () => {
+        playing = false;
+        btn.innerText = '↻ СЫГРАТЬ СНОВА';
+        btn.classList.remove('playing');
+    });
+
+    function updateUI(isPlaying) {
+        if (isPlaying) {
+            btn.classList.add('playing');
+            btn.innerText = '⏸ ПАУЗА';
+        } else {
+            btn.classList.remove('playing');
+             if(m.currentTime === 0 || m.paused && m.duration > 0 && m.currentTime < m.duration) {
+                 btn.innerText = '▶ ПРОДОЛЖИТЬ';
+             }
+        }
+    }
+</script>
+
+</body>
+</html>
